@@ -1,0 +1,6 @@
+coils.txt
+plas_eq.nc
+*.step
+*.log
+*.pickle
+*.h5m
