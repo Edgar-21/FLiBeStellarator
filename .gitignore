@@ -4,3 +4,16 @@ plas_eq.nc
 *.log
 *.pickle
 *.h5m
+*.cub5
+*.png
+*.xml
+core
+*.exo
+*.fac
+*.stl
+*.out
+*.xml
+*.vtk
+*.h5
+*.pkl
+*.csv
