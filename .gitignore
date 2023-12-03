@@ -17,3 +17,13 @@ core
 *.h5
 *.pkl
 *.csv
+!materials.xml
+*.cub
+*.sat
+*.jou
+logfile.txt
+/__pycache__
+__pycache__/
+*__pycache__*
+/test
+test*

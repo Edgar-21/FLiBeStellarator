@@ -77,7 +77,43 @@ magnets = {
                 'meshing': True
             }
 
-strengths = buildGeometry.buildModel(radialBuild=radialBuild, magnets=magnets)
+fwRadialBuild = {
+              'sol': {
+                'thickness_matrix': [
+                        [3,3,3,3,3,3,3,3,3],
+                        [3,3,3,3,3,3,3,3,3],
+                        [3,3,3,3,3,3,3,3,3],
+                        [3,3,3,3,3,3,3,3,3],
+                        [3,3,3,3,3,3,3,3,3]
+                ],
+                'h5m_tag': 'Vacuum'
+            },
+            'vacVessel': {
+                'thickness_matrix': [
+                        [8,8,8,8,8,8,8,8,8],
+                        [8,8,8,8,8,8,8,8,8],
+                        [8,8,8,8,8,8,8,8,8],
+                        [8,8,8,8,8,8,8,8,8],
+                        [8,8,8,8,8,8,8,8,8]
+                ],
+                'h5m_tag': 'Vacuum'
+            }
+}
+    
+
+export = {
+            'exclude': [],
+            'graveyard': False,
+            'step_export': True,
+            'h5m_export' : 'Cubit',
+            'plas_h5m_tag': 'Vacuum',
+            'sol_h5m_tag' : 'Vacuum',
+            'facet_tol' : 1,
+            'len_tol': 2,
+            'norm_tol' : None
+        }
+
+strengths = buildGeometry.buildModel(radialBuild=fwRadialBuild, export=export, magnets=None)
 
 #pickle strengths for later
 with open('strengths.pickle','wb') as f:
