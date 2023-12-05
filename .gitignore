@@ -23,7 +23,8 @@ core
 *.jou
 logfile.txt
 /__pycache__
-__pycache__/
+__pycache__/**
 *__pycache__*
 /test
 test*
+*.txt

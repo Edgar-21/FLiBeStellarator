@@ -16,6 +16,7 @@ with openmc.StatePoint('statepoint.5.h5') as sp:
     breederUmeshHeatingTally = sp.get_tally(name = "Breeder Mesh Heating Tally")
     meshes = sp._meshes
 
+print(meshes)
 #some constants
 mats = openmc.Materials.from_xml('materials.xml')
 fwMat = mats[11] #FNSFFWstruct
@@ -56,7 +57,7 @@ fwMesh.write_data_to_vtk(
 )
 
 
-#calculate heating in cylindrical mesh
+#calculate heating in cartesian mesh
 cylindricalMesh = meshes[2]
 cylindricalVolumes = cylindricalMesh.volumes
 mean = heatingMeshTally.get_reshaped_data(value='mean')
@@ -65,7 +66,7 @@ heatingMean = mean[:,0,0] #eV/source particle
 heatingStddev = stddev[:,0,0] #ev/source particle
 cylindricalMeshHeatingMean, cylindricalMeshHeatingStddev = tallierizer.calcHeating(heatingMean, heatingStddev, power, volumes = cylindricalVolumes)
 
-#neutron flux on cylindrical mesh
+#neutron flux on cartesian mesh
 nFluxMean = neutronMeshTally.get_reshaped_data(value='mean').flatten()
 nFluxStddev = neutronMeshTally.get_reshaped_data(value='std_dev').flatten()
 nFluxPercent = np.nan_to_num(np.divide(nFluxStddev, nFluxMean))
@@ -88,30 +89,30 @@ cylindricalMesh.write_data_to_vtk(
     volume_normalization = False
 )
 
-print("Total Heating in Cylindrical Mesh, MW: ", np.sum(np.multiply(cylindricalMeshHeatingMean, cylindricalVolumes.T.flatten()))/1e6)
+print("Total Heating in cylindricalg Mesh, MW: ", np.sum(np.multiply(cylindricalMeshHeatingMean, cylindricalVolumes.T.flatten()))/1e6)
 
 #calculate heating in unstructured mesh
-mean = breederUmeshTally.get_reshaped_data(value='mean')
-stddev = breederUmeshTally.get_reshaped_data(value='std_dev')
-umeshHeatingMean = mean[:,0,1]
-umeshHeatingStddev = stddev[:,0,1]
+mean = breederUmeshHeatingTally.get_reshaped_data(value='mean')
+stddev = breederUmeshHeatingTally.get_reshaped_data(value='std_dev')
+umeshHeatingMean = mean[:,0,0]
+umeshHeatingStddev = stddev[:,0,0]
 umesh = meshes[4]
 volumes = umesh.volumes
 umeshHeatingMean, umeshHeatingStddev = tallierizer.calcHeating(umeshHeatingMean, umeshHeatingStddev, power, volumes)
 print("Total Heating in breeder umesh MW", np.sum(np.multiply(umeshHeatingMean, volumes.T.flatten()))/1e6)
 
 #heating in breeder cell
-mean = breederTBRTally.get_reshaped_data(value='mean')
-stddev = breederTBRTally.get_reshaped_data(value='std_dev')
-mean = mean[:,0,1]
-stddev = stddev[:,0,1]
+mean = breederHeatingTally.get_reshaped_data(value='mean')
+stddev = breederHeatingTally.get_reshaped_data(value='std_dev')
+mean = mean[:,0,0]
+stddev = stddev[:,0,0]
 breederCellMeanHeating, breederCellStddevHeating = tallierizer.calcHeating(mean,stddev,power)
 print("Total Heating in breeder Cell MW: ", breederCellMeanHeating/1e6)
 print("Std dev MW: ", breederCellStddevHeating/1e6)
 
 #tritium breeding in unstructured mesh
-mean = breederUmeshTally.get_reshaped_data(value='mean')
-stddev = breederUmeshTally.get_reshaped_data(value='std_dev')
+mean = breederUmeshTBRTally.get_reshaped_data(value='mean')
+stddev = breederUmeshTBRTally.get_reshaped_data(value='std_dev')
 umesh = meshes[4]
 umeshTBRmean = mean[:,0,0]
 umeshTBRstddev = stddev[:,0,0]

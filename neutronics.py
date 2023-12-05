@@ -5,10 +5,8 @@ import numpy as np
 
 def neutronics(strengths, mats, particles = 10000, batches = 5):
 
-
-    periodic1 = openmc.Plane(a=-1, b=1,c=0,d=0, boundary_type = 'periodic', surface_id = 9998)
-    periodic2 = openmc.Plane(a=1, b=1,c=0,d=0, boundary_type='periodic', surface_id = 9997)
-
+    periodic1 = openmc.XPlane(boundary_type = 'periodic', surface_id = 9998)
+    periodic2 = openmc.YPlane(boundary_type='periodic', surface_id = 9997)
     
     dagUniv = openmc.DAGMCUniverse('dagmc.h5m')
     dagBoundingBox = dagUniv.bounding_box
@@ -20,8 +18,6 @@ def neutronics(strengths, mats, particles = 10000, batches = 5):
     region1 = -vacSurf & +periodic1 & +periodic2 #the region must be in the normal direction of both planes
     period1 = openmc.Cell(region=region1, fill = dagUniv, cell_id=9999, name = "period1")
 
-    #rotate 45 degrees to align with global axis
-    period1.rotation = [0,0,45]
 
     geometry = openmc.Geometry([period1])
     geometry.export_to_xml()
@@ -47,22 +43,23 @@ def neutronics(strengths, mats, particles = 10000, batches = 5):
     settings.export_to_xml()
 
     #create meshes for visualizing neutronics
-    print(period1.bounding_box)
-    cartesianMesh = openmc.RegularMesh()
-    cartesianMesh.dimension = [100,66,86]
-    cartesianMesh.lower_left = [-1000,569,-425]
-    cartesianMesh.upper_right = [1000,1219,425]
+    cylindricalMesh = openmc.CylindricalMesh(
+        r_grid = np.linspace(76327, 77077,66),
+        z_grid = np.linspace(-425,425,86),
+        phi_grid = np.linspace(0.771,0.799,100),
+        origin = np.array([-53604,-53604,0])
+    )
 
     #nuclear heating mesh tally
-    cartesianMeshFilter = openmc.MeshFilter(cartesianMesh)
+    cylindricalMeshFilter = openmc.MeshFilter(cylindricalMesh)
     heatingMeshTally = openmc.Tally(name = "Cartesian Mesh Heating Tally")
-    heatingMeshTally.filters = [cartesianMeshFilter]
+    heatingMeshTally.filters = [cylindricalMeshFilter]
     heatingMeshTally.scores = ['heating'] #eV/source, flux
     
     #neutron flux mesh tally
     neutronMeshTally = openmc.Tally(name = "Cartesian Mesh Neutron Flux Tally")
     nfilter = openmc.ParticleFilter(['neutron'])
-    neutronMeshTally.filters=[cartesianMeshFilter, nfilter]
+    neutronMeshTally.filters=[cylindricalMeshFilter, nfilter]
     neutronMeshTally.scores = ['flux'] #particle cm/source
 
     #FW DPA Cell tally
@@ -102,7 +99,7 @@ def neutronics(strengths, mats, particles = 10000, batches = 5):
     #Heating in breeder tally
     breederHeatingTally = openmc.Tally(name = "Breeder Heating Tally")
     breederHeatingTally.filters = [breederFilter]
-    breederHeatingTally.scores = ["Heating"] #ev/source
+    breederHeatingTally.scores = ["heating"] #ev/source
 
     #TBR in breeder mesh tally
     breederUmesh = openmc.UnstructuredMesh('breeder.h5m', library='moab')
